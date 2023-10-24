@@ -14,6 +14,8 @@ export class Wallet {
   @Column()
   account_number: string;
   @Column()
+  code: string;
+  @Column()
   account_balance: number;
   @Column()
   kyc: number;

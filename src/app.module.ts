@@ -7,10 +7,11 @@ import { UserService } from './user/user.service';
 import { PaymentsService } from './payments/payments.service';
 import { WalletService } from './wallet/wallet.service';
 import { TransactionService } from './transaction/transaction.service';
+import { WalletController } from './wallet/wallet.controller';
 
 @Module({
   imports: [],
-  controllers: [AppController, PaymentsController, UserController],
+  controllers: [AppController, PaymentsController, UserController, WalletController],
   providers: [AppService, UserService, PaymentsService, WalletService, TransactionService],
 })
 export class AppModule {}

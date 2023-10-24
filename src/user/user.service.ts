@@ -21,4 +21,7 @@ export class UserService {
 
     return wallet;
   }
+  getOne(id: string) {
+    return this.walletService.getAccount(id);
+  }
 }

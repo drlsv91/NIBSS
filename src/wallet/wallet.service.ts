@@ -24,6 +24,7 @@ export class WalletService {
       account_number: this.generateNumber(user.phone),
       kyc: this.getKycNumber(user),
       user_id: user.id,
+      code: `04${user.phone[2]}`,
     };
 
     const wallet = this.repo.create(walletData);
@@ -91,6 +92,12 @@ export class WalletService {
         fee: this.getFee(payload.amount),
       },
     );
+  }
+
+  enquiry(bankCode: string, accountNumber: string) {
+    return this.repo.findOne({
+      where: { account_number: accountNumber, code: bankCode },
+    });
   }
 
   private async doTransfer(
