@@ -22,6 +22,7 @@ export class TransactionService {
       timestamp: new Date().toISOString(),
       wallet_id: wallet.id,
       user_id: wallet.user_id,
+      sequence: 0,
     };
 
     const transaction = this.repo.create(transactionData);
@@ -44,6 +45,7 @@ export class TransactionService {
       user_id: source.user_id,
       destination_bank_balance: target.account_balance,
       destination_bank_number: target.account_number,
+      sequence: 0,
     };
 
     const transaction = this.repo.create(transactionData);

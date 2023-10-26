@@ -11,11 +11,12 @@ export class Wallet {
 
   @Column()
   account_name: string;
-  @Column()
+
+  @Column({ unique: true })
   account_number: string;
   @Column()
   code: string;
-  @Column()
+  @Column({ type: 'numeric' })
   account_balance: number;
   @Column()
   kyc: number;

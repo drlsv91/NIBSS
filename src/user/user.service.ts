@@ -17,7 +17,7 @@ export class UserService {
 
     const createdUser = await this.repo.save(user);
 
-    const wallet = this.walletService.create(createdUser);
+    const wallet = this.walletService.create(createdUser); //bank account
 
     return wallet;
   }

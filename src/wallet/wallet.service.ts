@@ -39,28 +39,53 @@ export class WalletService {
     return this.repo.findOne({ where: { account_number: accountNumber } });
   }
 
-  async credit(payload: CreateCreditDto) {
-    const wallet = await this.getBank(
+  async transfer(id: string, payload: CreateCreditDto) {
+    const targetWallet = await this.repo.findOne({ where: { id } });
+
+    if (!targetWallet) throw new NotFoundException('Bank not found');
+
+    const sourceWallet = await this.getBank(
       payload.account_number,
       payload.bank_code,
     );
 
-    if (!wallet) throw new NotFoundException('bank not found');
+    if (!sourceWallet) throw new NotFoundException('bank not found');
 
-    const newBalance = Number(wallet.account_balance) + Number(payload.amount);
+    const banks = await this.doTransfer(
+      sourceWallet,
+      targetWallet,
+      payload.amount,
+    );
 
-    await this.repo.update({ id: wallet.id }, { account_balance: newBalance });
+    return this.transactionService.transfer(
+      banks.source_bank,
+      banks.target_bank,
+      {
+        amount: payload.amount,
+        ref: payload.xref,
+        fee: this.getFee(payload.amount),
+      },
+    );
+  }
+  async credit(id: string, payload: CreateCreditDto) {
+    const targetWallet = await this.repo.findOne({ where: { id } });
 
-    const updatedWallet = await this.repo.findOne({ where: { id: wallet.id } });
+    if (!targetWallet) throw new NotFoundException('Bank not found');
 
-    return this.transactionService.create(updatedWallet, {
+    const balance = Number(targetWallet.account_balance) + payload.amount;
+
+    targetWallet.account_balance = balance;
+
+    await this.repo.save(targetWallet);
+
+    return this.transactionService.transfer(targetWallet, targetWallet, {
       amount: payload.amount,
       ref: payload.xref,
       fee: this.getFee(payload.amount),
     });
   }
 
-  async transfer(payload: CreateTransferRequestDto) {
+  async bulkTransfer(payload: CreateTransferRequestDto) {
     const sourceBank = await this.getBank(
       payload.source_account,
       payload.source_bank,
@@ -105,8 +130,13 @@ export class WalletService {
     targetBank: Wallet,
     amount: number,
   ): Promise<{ source_bank: Wallet; target_bank: Wallet }> {
-    const newSourceBalance = Number(sourceBank.account_balance) - amount;
-    const newTargetBalance = Number(targetBank.account_balance) + amount;
+    const newSourceBalance =
+      Number(sourceBank.account_balance) - Number(amount);
+
+    if (newSourceBalance < 0)
+      throw new NotAcceptableException('INSUFFICIENT FUNDS');
+    const newTargetBalance =
+      Number(targetBank.account_balance) + Number(amount);
 
     sourceBank.account_balance = newSourceBalance;
     targetBank.account_balance = newTargetBalance;

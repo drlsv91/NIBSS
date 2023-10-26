@@ -3,7 +3,7 @@ import { Wallet } from 'src/wallet/wallet-entity';
 import {
   Column,
   Entity,
-  Generated,
+  // Generated,
   ManyToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
@@ -26,27 +26,29 @@ export enum TransactionMessage {
 export class Transaction {
   @PrimaryGeneratedColumn('uuid')
   id: string;
-  @Column()
+  @Column({ default: new Date().toISOString() })
   timestamp: string;
   @Column()
   xref: string;
   @Column()
-  @Generated('increment')
+  // @Generated('increment')
   sequence: number;
 
-  @Column({
-    type: 'enum',
-    enum: TransactionStatus,
-    default: TransactionStatus.PENDING,
-  })
-  status: TransactionStatus;
+  // @Column({
+  //   type: 'enum',
+  //   enum: TransactionStatus,
+  //   default: TransactionStatus.PENDING,
+  // })
+  @Column({ default: TransactionStatus.SUCCESS })
+  status: string;
 
-  @Column({
-    type: 'enum',
-    enum: TransactionMessage,
-    default: TransactionMessage.PENDING,
-  })
-  message: TransactionMessage;
+  // @Column({
+  //   type: 'enum',
+  //   enum: TransactionMessage,
+  //   default: TransactionMessage.PENDING,
+  // })
+  @Column({ default: TransactionMessage.SENT })
+  message: string;
 
   @Column({ type: 'numeric' }) // enfornce precision
   amount: number;
@@ -55,12 +57,12 @@ export class Transaction {
 
   @Column() // enfornce precision
   account_number: string;
-  @Column() // enfornce precision
+  @Column({ type: 'numeric' }) // enfornce precision
   account_balance: number;
 
   @Column() // enfornce precision
   destination_bank_number: string;
-  @Column() // enfornce precision
+  @Column({ type: 'numeric' }) // enfornce precision
   destination_bank_balance: number;
 
   @ManyToOne(() => Wallet, { nullable: false })
